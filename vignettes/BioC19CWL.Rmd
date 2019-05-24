@@ -1,5 +1,5 @@
 ---
-title: "Combined CWL workshop"
+title: "Bridging Bioconductor to other bioinformatics tools using CWL"
 date: "`r Sys.Date()`"
 output:
   BiocStyle::html_document:

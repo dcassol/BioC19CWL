@@ -1,4 +1,4 @@
-# BioC19CWL
+# Bridging Bioconductor to other bioinformatics tools using CWL
 
 The goal of BioC19CWL is to ...
 

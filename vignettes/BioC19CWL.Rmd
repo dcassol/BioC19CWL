@@ -313,7 +313,7 @@ COPY Dockerfile /opt/
 ## Rcwl
 ### Introduction to Rcwl
 #### Rcwl setup
-The `Rcwl` package is aimed to a simple and user-friendly way to manage command line tools and build data analysis pipelines in R using Common Workflow Language (CWL). The `Rcwl` and `RcwlPipelines` packages are available in Bioc 3.7 and R >= 3.6. You can install them by the `BiocManager` package.
+The `Rcwl` package is aimed at a simple and user-friendly way to manage command line tools and build data analysis pipelines in R using Common Workflow Language (CWL). The `Rcwl` and `RcwlPipelines` packages are available in Bioc 3.7 and R >= 3.6. You can install them by the `BiocManager` package.
 ```{r}
 if (!requireNamespace("RcwlPipelines", quietly = TRUE))
 	BiocManager::install(c("Rcwl", "RcwlPipelines"))
@@ -323,15 +323,15 @@ library(RcwlPipelines)
 
 #### System requirements
 
-Besides the depedencies of the R packages, the following tools are required to be installed to run the .
+In addition to the R packages, the following tools are required to be installed to run the examples in this document.
 
 * cwltool (>= 1.0.2018)
 * nodejs
 * Docker (optional)
 
-The `cwltool` is the reference implementation of the Common Workflow Language, which is used to run the CWL scripts. The `nodejs` is required when the CWL scripts use JavaScript language. The Docker containers simplify software installation and management. A CWL runner can pull the required Docker containers automatically and adjusting the paths of input files.
+The `cwltool` is the reference implementation of the Common Workflow Language, which is used to run the CWL scripts. The `nodejs` is required when the CWL scripts use the JavaScript language. The Docker containers simplify software installation and management. A CWL runner can pull the required Docker containers automatically and adjust the paths of input files.
 
-Here you can find instruction to install these tools.
+You can find instructions to install these tools here:
 
 * <https://github.com/common-workflow-language/cwltool#install>
 * <https://nodejs.org>
@@ -341,13 +341,12 @@ Here you can find instruction to install these tools.
 #### Hello world
 The main class and constructor function is `cwlParam`, which wrap a command line tool and its parameters in a `cwlParam` object. Let's start with a simple example, `echo hello world`.
 
-First, we load the package and then define the input parameter for "echo", a string without a prefix. Just an `id` option required.
-
+First, we load the package and then define the input parameter for "echo", a string without a prefix. Just an `id` option is required.
 ```{r}
 input1 <- InputParam(id = "sth")
 ```
 
-Second, create a `cwlParam` object with `baseCommand` for the command to execute and `InputParamList` for the input parameters.
+Second, we create a `cwlParam` object with `baseCommand` for the command to execute and `InputParamList` for the input parameters.
 ```{r}
 echo <- cwlParam(baseCommand = "echo", inputs = InputParamList(input1))
 ```
@@ -371,7 +370,7 @@ r1$output
 readLines(r1$output)
 ```
 
-The executed command was returned in the result list. It shows the command that we defined to run.
+The executed command was returned in the result list. It shows the command that we have defined to run.
 ```{r}
 r1$command
 ```
@@ -380,7 +379,8 @@ The log shows the details of how the `cwltool` works with CWL scripts.
 ```{r}
 r1$log
 ```
-The `runCWL` generated two scripts with the default `tempfile` prefix, the tool wrapper CWL file and the input YML file. The `cwltool` parse the two scripts and translate them to the command shown before. The output is not defined in the `cwlParam` object, so the command output was returned to __stdout__ by default.
+
+The `runCWL` generated two scripts with the default `tempfile` prefix, the tool wrapper CWL file and the input YML file. The `cwltool` parses the two scripts and translates them into the command shown before. The output is not defined in the `cwlParam` object, so the command output was returned to __stdout__ by default.
 
 ### Components
 #### Input Parameters
@@ -388,7 +388,7 @@ The `runCWL` generated two scripts with the default `tempfile` prefix, the tool 
 
 For the input parameters, three options need to be defined usually, *id*, *type*, and *prefix*. The type can be *string*, *int*, *long*, *float*, *double*, and so on. More detail can be found at: <https://www.commonwl.org/v1.0/CommandLineTool.html#CWLType>.
 
-Here is an example from [CWL user guide](http://www.commonwl.org/user_guide/03-input/). Here we defined an `echo` with different type of input parameters by `InputParam`. The `stdout` option can be used to caputre the standard output stream to a file.
+Here is an example from the CWL user guide(<http://www.commonwl.org/user_guide/03-input/>). We defined the `echo` with different type of input parameters by `InputParam`, and the `stdout` option can be used to caputre the standard output stream into a file:
 
 ```{r}
 e1 <- InputParam(id = "flag", type = "boolean", prefix = "-f")
@@ -401,7 +401,7 @@ echoA <- cwlParam(baseCommand = "echo",
                   stdout = "output.txt")
 ```
 
-Then we give it a try by setting values for the inputs.
+Then we give it a try by assigning values to the inputs.
 ```{r}
 echoA$flag <- TRUE
 echoA$string <- "Hello"
@@ -417,7 +417,7 @@ r2$command
 
 2. Array Inputs
 
-A similar example to CWL user guide. We can define three different type of array as inputs. 
+Taking a similar example to the CWL user guide described above, we can define three different type of array as inputs: 
 ```{r}
 a1 <- InputParam(id = "A", type = "string[]", prefix = "-A")
 a2 <- InputParam(id = "B",
@@ -429,7 +429,7 @@ echoB <- cwlParam(baseCommand = "echo",
                  inputs = InputParamList(a1, a2, a3))
 ```
 
-Then set values for the three inputs.
+We then set values for the three inputs:
 ```{r}
 echoB$A <- letters[1:3]
 echoB$B <- letters[4:6]
@@ -446,9 +446,9 @@ r3$command
 #### Output Parameters
 1. Capturing Output
 
-The outputs, similar to the inputs, is a list of output parameters. Three options *id*, *type* and *glob* can be defined. The glob option is used to define a pattern to find files relative to the output directory.
+The outputs, similar to the inputs, is a list of output parameters. Three options, *id*, *type* and *glob*, can be defined. The *glob* option is used to define a pattern to find files relative to the output directory.
 
-Here is an example to unzip a compressed `gz` file. First, we generate a compressed R script file.
+Here is an example to unzip a compressed `gz` file. First, we generate a compressed R script file:
 ```{r}
 zzfil <- file.path(tempdir(), "sample.R.gz")
 zz <- gzfile(zzfil, "w")
@@ -456,7 +456,7 @@ cat("sample(1:10, 5)", file = zz, sep = "\n")
 close(zz)
 ```
 
-We define a `cwlParam` object to use "gzip" to uncompress a input file.
+We then define a `cwlParam` object to use "gzip" to uncompress an input file:
 ```{r}
 ofile <- "sample.R"
 z1 <- InputParam(id = "uncomp", type = "boolean", prefix = "-d")
@@ -469,7 +469,7 @@ gz <- cwlParam(baseCommand = "gzip",
                stdout = ofile)
 ```
 
-Now the `gz` object can be used to uncompress the previous generated compressed file.
+Now the `gz` object can be used to uncompress the previously generated compressed file:
 ```{r}
 gz$uncomp <- TRUE
 gz$out <- TRUE
@@ -478,7 +478,7 @@ r4 <- runCWL(gz, outdir = tempdir())
 r4$output
 ```
 
-Or we can use `arguments` to set some default parameters.
+Or we can use `arguments` to set some default parameters:
 ```{r}
 z1 <- InputParam(id = "zfile", type = "File")
 o1 <- OutputParam(id = "rfile", type = "File", glob = ofile)
@@ -492,12 +492,12 @@ Gz$zfile <- zzfil
 r4a <- runCWL(Gz, outdir = tempdir())
 ```
 
-To make it for general usage, we can define a pattern with javascript to glob the output, which require `node` to be installed in your system PATH.
+To make it for general usage, we can define a pattern with javascript to *glob* the output, which requires `node` to be installed in your system PATH:
 ```{r}
 pfile <- "$(inputs.zfile.path.split('/').slice(-1)[0].split('.').slice(0,-1).join('.'))"
 ```
 
-Or we can use the CWL built in file property, `nameroot`, directly.
+Or we can directly use the CWL built in file property, `nameroot`:
 ```{r}
 pfile <- "$(inputs.zfile.nameroot)"
 o2 <- OutputParam(id = "rfile", type = "File", glob = pfile)
@@ -513,7 +513,7 @@ r4b <- runCWL(GZ, outdir = tempdir())
 
 2. Array Outputs
 
-We can also capture multiple output files with `glob` pattern.
+We can also capture multiple output files with `glob` pattern:
 ```{r}
 a <- InputParam(id = "a", type = InputArrayParam(items = "string"))
 b <- OutputParam(id = "b", type = OutputArrayParam(items = "File"),
@@ -529,7 +529,7 @@ r5$output
 ### Run approaches
 #### Running Tools in parallel
 
-The CWL also can work in high performance clusters with batch-queuing system, such as SGE, PBS, SLURM and so on, using the Bioconductor package `BiocParallel`. Here is an example to submit jobs with "Multiicore" and "SGE".
+The CWL can also work in high performance clusters with batch-queuing system, such as SGE, PBS, SLURM and so on, using the Bioconductor package `BiocParallel`. Here is an example to submit jobs with "Multiicore" and "SGE", seperately: 
 
 ```{r, eval=FALSE}
 library(BiocParallel)
@@ -549,7 +549,7 @@ result2 <- runCWLBatch(cwl = echo, outdir = tempdir(),
 ```
 
 #### Web Application
-Here we build a tool with different types of input parameters.
+Here we build a tool with different types of input parameters:
 ```{r}
 e1 <- InputParam(id = "flag", type = "boolean",
                  prefix = "-f", doc = "boolean flag")
@@ -567,11 +567,7 @@ mulEcho <- cwlParam(baseCommand = "echo", id = "mulEcho",
 mulEcho
 ```
 
-Some input parameters can be predefined in a list, which will be
-converted to select options in the webapp. An `upload` parameter can
-be used to defined wether to generate an upload interface for the file
-type option. If FALSE, the upload field will be text input (file path)
-instead of file input.
+Some input parameters can be predefined in a list, which will be converted to selected options in the webapp. An `upload` parameter can be used to generate an upload interface for the file type option. If `FALSE` is set for `upload`, the upload field will be text input (file path) instead of file input.
 
 ```{r, eval=FALSE}
 inputList <- list(option = c("option1", "option2"))
@@ -600,8 +596,7 @@ DE <- cwlParam(baseCommand = c("Rscript", rtool),
                outputs = OutputParamList(o1))
 ```
 
-To test the tool using data from the "pasilla" package.
-
+We can test the tool using data from the "pasilla" package.
 ```{r, eval=FALSE}
 DE$counts <- list.files(system.file("extdata", package = "pasilla"),
                         "treat", full.names = TRUE)
@@ -614,7 +609,7 @@ DEres <- runCWL(DE, outdir = tempdir())
 
 Here are the command and results:
 ```{r, eval=FALSE}
-head(DEres$command, n=22)
+head(DEres$command)
 head(DEres$output)
 ```
 
@@ -623,10 +618,9 @@ head(DEres$output)
 
 The R scripts to build the CWL tools and pipelines based on the `Rcwl`
 package are stored in the "tools" and "pipelines" folder respectively
-in the `RcwlPipelines` package. The function `cwlTools` can be used to
-collect the available scripts. The `cachePath` can be your existing
-cache directory or a new folder.
-
+in the `RcwlPipelines` package. The function `cwlTools` can be used to 
+catalog the available scripts, where the `cachePath` can be your 
+existing cache directory or a new folder:
 ```{r}
 tools <- cwlTools(cachePath = tempdir())
 tools
@@ -639,8 +633,8 @@ bfcinfo(tools) %>% select(rname, fpath)
 ```
 
 #### Build a pipeline
-We can develop a pipline by utilizing the available tools. For
-example, a simple alignment pipelines with mapping and marking
+A pipline can be built by utilizing the tools cataloged by the `tools`. 
+For example, a simple alignment pipelines with mapping and marking
 duplicates can be built from the `tools`.
 
 First, we load the required tools, bwa, samtools and picard
@@ -718,7 +712,7 @@ The pipeline is ready for use. We can plot the pipeline with
 plotCWL(Align)
 ```
 
-Let's run the pipeline.
+Let's test the pipeline.
 ```{r, eval=FALSE}
 library(BiocParallel)
 ids <- c("normal", "tumor")

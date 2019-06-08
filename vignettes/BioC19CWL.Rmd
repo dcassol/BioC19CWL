@@ -1,35 +1,31 @@
 ---
-title: "Combined CWL workshop"
-date: "`r Sys.Date()`"
 output:
-  BiocStyle::html_document:
-    number_sections: yes
-    toc_float: true
-    code_folding: show
+  rmarkdown::html_document:
+    highlight: pygments
+    toc: true
+    toc_depth: 3
+    fig_width: 5
 vignette: >
-  %\VignetteIndexEntry{test}
+  %\VignetteIndexEntry{BioC19CWL}
   %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+  %\VignetteEncoding[utf8]{inputenc}
+bibliography: bibtex.bib
 ---
 
-<center>
+# Bridging Bioconductor to other bioinformatics tools using CWL
 
-![](images/cwllogo.jpg)
-</center>
-
-```{r, echo=FALSE}
-knitr::opts_chunk$set(
-  collapse = TRUE,
-  comment = "#>"
-)
+```{r, echo=FALSE, out.width="30%"}
+knitr::include_graphics(
+            c(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "cwllogo.jpg"),
+              "https://github.com/Bioconductor/BiocStickers/raw/master/systemPipeR/systemPipeR.png"))
 ```
 
-# Instructors and contact information
+## Instructors and contact information
 * [Marko Zecevic](https://github.com/markozecevic) (marko.zecevic@sbgenomics.com)
 * [Daniela Cassol](https://github.com/dcassol) (danielac@ucr.edu) 
 * [Qiang Hu](https://github.com/hubentu) (Qiang.Hu@roswellpark.org)
 
-# Workshop Description
+## Workshop Description
 <!--
 Put together some phrases. Need to describe better
 -->
@@ -54,6 +50,13 @@ Participants will be able to try out all of the functionality described. Active 
 ### Installation
 
 #### System dependencies
+* cwltool
+
+A python package `cwltool` is required to be installed. The cwltool is the reference implementation of the Common Workflow Language, which is used to run the CWL scripts. Here is the instruction to install the tool. <https://github.com/common-workflow-language/cwltool#install>
+
+* Docker
+
+The Docker engine requirement is optional, but it can simplify software installation and management.
 
 #### R Packages
 The [Bioconductor](http://www.bioconductor.org/) R Packages can be installed from the R console using the [_`BiocManager::install`_](https://cran.r-project.org/web/packages/BiocManager/index.html) command. The associated package for this Workshop [_`BioC19CWL`_](https://github.com/hubentu/BioC19CWL) can be installed directly from GitHub, as demonstrated below. The latter provide the samples demo data and all the parameter files required to test and run these examples quickly.
@@ -63,7 +66,7 @@ if (!requireNamespace("BiocManager", quietly=TRUE)) install.packages("BiocManage
 BiocManager::install(c("systemPipeR", "systemPipeRdata", "Rcwl", "RcwlPipelines"))
 ```
 
-##### Loading packages 
+#### Loading packages 
 
 ```{r packages, eval=TRUE}
 # Loads the packages
@@ -85,29 +88,28 @@ library(RcwlPipelines)
 | Case study                                   | Qiang Hu       | 10m  |
 | systemPipeR                                  | Daniela Cassol | 40m  |
 
-# Workshop goals and objectives
+## Workshop goals and objectives
 
-## Learning goals
+### Learning goals
 * Integration of command-line tools via the CWL community standard
 * Design of CWL workflows
 * Understand how to wrap tools with `Rcwl`
 * Practice building a pipeline
 * ...
 
-## Learning objectives
+### Learning objectives
 * How to make analysis workflows more robust, reproducible and portable across heterogeneous computing systems
 * Create a basic `echo` tool
 * Build a simple DNASeq alignment pipeline
 * Usage of new CWL S4 class in *systemPipeR*
 * ...
 
-# Introduction to CWL
+## Introduction to CWL
 
 Sharing a data analysis pipeline which you created using ad hoc methods is a challenging task. Failure to address any detail regarding commands, tools or the enviromenent in which the analysis is performed can hinder the reproducibility of your work.
 
 <center>
-
-![](images/nocwl1.png)
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "nocwl1.png"))`
 </center>
 
 To overcome this challenge, the bioinformatics community is embracing the use of software container technologies (such as Docker) and workflow description languages for easier documentation and replication of analysis pipelines.
@@ -117,8 +119,7 @@ Docker containers simplified how we share software, because they neatly package 
 However, containers do not come with instructions on how to execute these applications in a fashion that is human or machine-readable. This is where workflow description languages come into play. The Common Workflow Language (CWL), established in 2014, is a community-developed and widely adopted specification for describing containerized tools and workflows with plain text documents in a way that enables automation, scaling and reproducibility. Applications described with Docker images and CWL will run consistently, in the way you intend, on everything from your local computer, your HPC, to your cloud infrastructure and various cloud platforms.
 
 <center>
-
-![](images/yescwl1.png)
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "yescwl1.png"))`
 </center>
 
 CWL can be written in easily readable and parsable YAML, or a bit less readable, but just as parsable JSON - or a combination of both! It allows for extensions and tooling that facilitate code development, testing, and execution. One such set of tools is the [Rabix project](Rabix.io) from Seven Bridges - an open-source project that enables rapid composition and execution of CWL workflows in a manner that is scalable and reproducible.
@@ -164,7 +165,7 @@ requirements:
 
 CWL requires executors or workflow engines to interpret and execute.
 
-## Example usecase
+### Example usecase
 
 Perhaps you are a researcher analyzing a dataset using Bioconductor tools and are planning to share your methods and findings with the world. You want your analysis to be reproducible so that once it's published, anyone with the access to the input data can repeat everything you've done and produce exactly the same outputs.
 
@@ -209,7 +210,7 @@ finish(des2Report)
 
 In the example above, the input files used come from the [pasilla package](http://bioconductor.org/packages/release/data/experiment/html/pasilla.html). If there is a chance you or someone else will be running a similar analysis in the future, then it may be a good idea to limit the “hard-coding” of inputs and parameters and instead provide them at runtime via command-line arguments.
 
-## The command-line interface
+### The command-line interface
 
 The first thing one needs to do in order to wrap his R/Bioconductor script into a neat portable CWL package is define the command-line interface. This can be done easily by using the R implementation of [docopt](http://docopt.org/). With docopt, by providing your script with a help message, you are at the same time defining its command line interface.
 
@@ -277,7 +278,7 @@ Now the script can be executed from the command line like this:
 Rscript exscrDoc.R --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated1fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated2fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated3fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated1fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated2fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated3fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated4fb.txt --phenodata /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/pasilla_sample_annotation.csv --factor condition --control type
 ```
 
-## Dockerizing
+### Dockerizing
 
 If you are new to Docker, the official documentation is the best place to [get started](https://docs.docker.com/get-started/)! 
 
@@ -310,10 +311,10 @@ RUN R -e 'BiocManager::install("ReportingTools")'
 COPY Dockerfile /opt/
 ```
 
-# Rcwl
-## Introduction to Rcwl
-### Rcwl setup
-The `Rcwl` package is aimed to a simple and user-friendly way to manage command line tools and build data analysis pipelines in R using Common Workflow Language (CWL). The `Rcwl` and `RcwlPipelines` packages are available in Bioc 3.7 and R >= 3.6. You can install them by the `BiocManager` package.
+## Rcwl
+### Introduction to Rcwl
+#### Rcwl setup
+The `Rcwl` package is aimed at a simple and user-friendly way to manage command line tools and build data analysis pipelines in R using Common Workflow Language (CWL). The `Rcwl` and `RcwlPipelines` packages are available in Bioc 3.7 and R >= 3.6. You can install them by the `BiocManager` package.
 ```{r}
 if (!requireNamespace("RcwlPipelines", quietly = TRUE))
 	BiocManager::install(c("Rcwl", "RcwlPipelines"))
@@ -321,33 +322,32 @@ library(Rcwl)
 library(RcwlPipelines)
 ```
 
-### System requirements
+#### System requirements
 
-Besides the depedencies of the R packages, the following tools are required to be installed to run the .
+In addition to the R packages, the following tools are required to be installed to run the examples in this document.
 
 * cwltool (>= 1.0.2018)
 * nodejs
 * Docker (optional)
 
-The `cwltool` is the reference implementation of the Common Workflow Language, which is used to run the CWL scripts. The `nodejs` is required when the CWL scripts use JavaScript language. The Docker containers simplify software installation and management. A CWL runner can pull the required Docker containers automatically and adjusting the paths of input files.
+The `cwltool` is the reference implementation of the Common Workflow Language, which is used to run the CWL scripts. The `nodejs` is required when the CWL scripts use the JavaScript language. The Docker containers simplify software installation and management. A CWL runner can pull the required Docker containers automatically and adjust the paths of input files.
 
-Here you can find instruction to install these tools.
+You can find instructions to install these tools here:
 
 * <https://github.com/common-workflow-language/cwltool#install>
 * <https://nodejs.org>
 * <https://docs.docker.com/install>
 
-## First example
-### Hello world
+### First example
+#### Hello world
 The main class and constructor function is `cwlParam`, which wrap a command line tool and its parameters in a `cwlParam` object. Let's start with a simple example, `echo hello world`.
 
-First, we load the package and then define the input parameter for "echo", a string without a prefix. Just an `id` option required.
-
+First, we load the package and then define the input parameter for "echo", a string without a prefix. Just an `id` option is required.
 ```{r}
 input1 <- InputParam(id = "sth")
 ```
 
-Second, create a `cwlParam` object with `baseCommand` for the command to execute and `InputParamList` for the input parameters.
+Second, we create a `cwlParam` object with `baseCommand` for the command to execute and `InputParamList` for the input parameters.
 ```{r}
 echo <- cwlParam(baseCommand = "echo", inputs = InputParamList(input1))
 ```
@@ -358,7 +358,7 @@ echo$sth <- "Hello World!"
 echo
 ```
 
-### Test run
+#### Test run
 The function `runCWL` is used to run the CWL object by invoking the python tool `cwltool`. The return will be a list including the command executed, temporary output and logs. The output directory is the current folder by default, but it can be changed by setting `outdir` option. All standard out and standard error stream can also be printed by setting `stderr = ""`.
 ```{r}
 r1 <- runCWL(echo, outdir = tempdir())
@@ -371,7 +371,7 @@ r1$output
 readLines(r1$output)
 ```
 
-The executed command was returned in the result list. It shows the command that we defined to run.
+The executed command was returned in the result list. It shows the command that we have defined to run.
 ```{r}
 r1$command
 ```
@@ -380,26 +380,29 @@ The log shows the details of how the `cwltool` works with CWL scripts.
 ```{r}
 r1$log
 ```
-The `runCWL` generated two scripts with the default `tempfile` prefix, the tool wrapper CWL file and the input YML file. The `cwltool` parse the two scripts and translate them to the command shown before. The output is not defined in the `cwlParam` object, so the command output was returned to __stdout__ by default.
 
-## Components
-### Input Parameters
+The `runCWL` generated two scripts with the default `tempfile` prefix, the tool wrapper CWL file and the input YML file. The `cwltool` parses the two scripts and translates them into the command shown before. The output is not defined in the `cwlParam` object, so the command output was returned to __stdout__ by default.
+
+### Components
+#### Input Parameters
 1. Essential Input parameters
+
 For the input parameters, three options need to be defined usually, *id*, *type*, and *prefix*. The type can be *string*, *int*, *long*, *float*, *double*, and so on. More detail can be found at: <https://www.commonwl.org/v1.0/CommandLineTool.html#CWLType>.
 
-Here is an example from [CWL user guide](http://www.commonwl.org/user_guide/03-input/). Here we defined an `echo` with different type of input parameters by `InputParam`. The `stdout` option can be used to caputre the standard output stream to a file.
+Here is an example from the CWL user guide(<http://www.commonwl.org/user_guide/03-input/>). We defined the `echo` with different type of input parameters by `InputParam`, and the `stdout` option can be used to caputre the standard output stream into a file:
 
 ```{r}
 e1 <- InputParam(id = "flag", type = "boolean", prefix = "-f")
 e2 <- InputParam(id = "string", type = "string", prefix = "-s")
 e3 <- InputParam(id = "int", type = "int", prefix = "-i")
-e4 <- InputParam(id = "file", type = "File", prefix = "--file=", separate = FALSE)
+e4 <- InputParam(id = "file", type = "File",
+                 prefix = "--file=", separate = FALSE)
 echoA <- cwlParam(baseCommand = "echo",
                   inputs = InputParamList(e1, e2, e3, e4),
                   stdout = "output.txt")
 ```
 
-Then we give it a try by setting values for the inputs.
+Then we give it a try by assigning values to the inputs.
 ```{r}
 echoA$flag <- TRUE
 echoA$string <- "Hello"
@@ -414,7 +417,8 @@ r2$command
 ```
 
 2. Array Inputs
-A similar example to CWL user guide. We can define three different type of array as inputs. 
+
+Taking a similar example to the CWL user guide described above, we can define three different type of array as inputs: 
 ```{r}
 a1 <- InputParam(id = "A", type = "string[]", prefix = "-A")
 a2 <- InputParam(id = "B",
@@ -426,7 +430,7 @@ echoB <- cwlParam(baseCommand = "echo",
                  inputs = InputParamList(a1, a2, a3))
 ```
 
-Then set values for the three inputs.
+We then set values for the three inputs:
 ```{r}
 echoB$A <- letters[1:3]
 echoB$B <- letters[4:6]
@@ -440,11 +444,12 @@ r3 <- runCWL(echoB, outdir = tempdir())
 r3$command
 ```
 
-### Output Parameters
+#### Output Parameters
 1. Capturing Output
-The outputs, similar to the inputs, is a list of output parameters. Three options *id*, *type* and *glob* can be defined. The glob option is used to define a pattern to find files relative to the output directory.
 
-Here is an example to unzip a compressed `gz` file. First, we generate a compressed R script file.
+The outputs, similar to the inputs, is a list of output parameters. Three options, *id*, *type* and *glob*, can be defined. The *glob* option is used to define a pattern to find files relative to the output directory.
+
+Here is an example to unzip a compressed `gz` file. First, we generate a compressed R script file:
 ```{r}
 zzfil <- file.path(tempdir(), "sample.R.gz")
 zz <- gzfile(zzfil, "w")
@@ -452,7 +457,7 @@ cat("sample(1:10, 5)", file = zz, sep = "\n")
 close(zz)
 ```
 
-We define a `cwlParam` object to use "gzip" to uncompress a input file.
+We then define a `cwlParam` object to use "gzip" to uncompress an input file:
 ```{r}
 ofile <- "sample.R"
 z1 <- InputParam(id = "uncomp", type = "boolean", prefix = "-d")
@@ -465,7 +470,7 @@ gz <- cwlParam(baseCommand = "gzip",
                stdout = ofile)
 ```
 
-Now the `gz` object can be used to uncompress the previous generated compressed file.
+Now the `gz` object can be used to uncompress the previously generated compressed file:
 ```{r}
 gz$uncomp <- TRUE
 gz$out <- TRUE
@@ -474,7 +479,7 @@ r4 <- runCWL(gz, outdir = tempdir())
 r4$output
 ```
 
-Or we can use `arguments` to set some default parameters.
+Or we can use `arguments` to set some default parameters:
 ```{r}
 z1 <- InputParam(id = "zfile", type = "File")
 o1 <- OutputParam(id = "rfile", type = "File", glob = ofile)
@@ -488,12 +493,12 @@ Gz$zfile <- zzfil
 r4a <- runCWL(Gz, outdir = tempdir())
 ```
 
-To make it for general usage, we can define a pattern with javascript to glob the output, which require `node` to be installed in your system PATH.
+To make it for general usage, we can define a pattern with javascript to *glob* the output, which requires `node` to be installed in your system PATH:
 ```{r}
 pfile <- "$(inputs.zfile.path.split('/').slice(-1)[0].split('.').slice(0,-1).join('.'))"
 ```
 
-Or we can use the CWL built in file property, `nameroot`, directly.
+Or we can directly use the CWL built in file property, `nameroot`:
 ```{r}
 pfile <- "$(inputs.zfile.nameroot)"
 o2 <- OutputParam(id = "rfile", type = "File", glob = pfile)
@@ -509,20 +514,23 @@ r4b <- runCWL(GZ, outdir = tempdir())
 
 2. Array Outputs
 
-We can also capture multiple output files with `glob` pattern.
+We can also capture multiple output files with `glob` pattern:
 ```{r}
 a <- InputParam(id = "a", type = InputArrayParam(items = "string"))
-b <- OutputParam(id = "b", type = OutputArrayParam(items = "File"), glob = "*.txt")
-touch <- cwlParam(baseCommand = "touch", inputs = InputParamList(a), outputs = OutputParamList(b))
+b <- OutputParam(id = "b", type = OutputArrayParam(items = "File"),
+                 glob = "*.txt")
+touch <- cwlParam(baseCommand = "touch",
+                  inputs = InputParamList(a),
+                  outputs = OutputParamList(b))
 touch$a <- c("a.txt", "b.gz", "c.txt")
 r5 <- runCWL(touch, outdir = tempdir())
 r5$output
 ```
 
-## Run approaches
-### Running Tools in parallel
+### Run approaches
+#### Running Tools in parallel
 
-The CWL also can work in high performance clusters with batch-queuing system, such as SGE, PBS, SLURM and so on, using the Bioconductor package `BiocParallel`. Here is an example to submit jobs with "Multiicore" and "SGE".
+The CWL can also work in high performance clusters with batch-queuing system, such as SGE, PBS, SLURM and so on, using the Bioconductor package `BiocParallel`. Here is an example to submit jobs with "Multiicore" and "SGE", seperately: 
 
 ```{r, eval=FALSE}
 library(BiocParallel)
@@ -530,17 +538,19 @@ sth.list <- as.list(LETTERS)
 names(sth.list) <- LETTERS
 
 ## submit with mutlicore
-result1 <- runCWLBatch(cwl = echo, outdir = tempdir(), inputList = list(sth = sth.list),
+result1 <- runCWLBatch(cwl = echo, outdir = tempdir(),
+                       inputList = list(sth = sth.list),
                        BPPARAM = MulticoreParam(4))
 
 ## submit with SGE
-result2 <- runCWLBatch(cwl = echo, outdir = tempdir(), inputList = list(sth = sth.list),
+result2 <- runCWLBatch(cwl = echo, outdir = tempdir(),
+                       inputList = list(sth = sth.list),
                        BPPARAM = BatchtoolsParam(workers = 4, cluster = "sge",
                                                  resources = list(queue = "all.q")))
 ```
 
-### Web Application
-Here we build a tool with different types of input parameters.
+#### Web Application
+Here we build a tool with different types of input parameters:
 ```{r}
 e1 <- InputParam(id = "flag", type = "boolean",
                  prefix = "-f", doc = "boolean flag")
@@ -558,11 +568,7 @@ mulEcho <- cwlParam(baseCommand = "echo", id = "mulEcho",
 mulEcho
 ```
 
-Some input parameters can be predefined in a list, which will be
-converted to select options in the webapp. An `upload` parameter can
-be used to defined wether to generate an upload interface for the file
-type option. If FALSE, the upload field will be text input (file path)
-instead of file input.
+Some input parameters can be predefined in a list, which will be converted to selected options in the webapp. An `upload` parameter can be used to generate an upload interface for the file type option. If `FALSE` is set for `upload`, the upload field will be text input (file path) instead of file input.
 
 ```{r, eval=FALSE}
 inputList <- list(option = c("option1", "option2"))
@@ -570,11 +576,14 @@ app <- cwlShiny(mulEcho, inputList, upload = TRUE)
 runApp(app)
 ```
 
-## Wrap R command-line tool
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "cwlShiny.png"))`
+
+### Wrap R command-line tool
 
 Let's wrap the previous "exscrDoc.R" with `Rcwl`.
 ```{r}
-rtool <- normalizePath("exscrDoc.R")
+sysdir <- system.file(package="BioC19CWL")
+rtool <- file.path(sysdir, "vignettes", "extdata", "exscrDoc.R")
 p1 <- InputParam(id = "counts",
                  type = InputArrayParam(items = "File",
                                         prefix = "--counts"))
@@ -588,7 +597,7 @@ DE <- cwlParam(baseCommand = c("Rscript", rtool),
                outputs = OutputParamList(o1))
 ```
 
-To test the tool using data from the "pasilla" package.
+We can test the tool using data from the "pasilla" package.
 ```{r, eval=FALSE}
 DE$counts <- list.files(system.file("extdata", package = "pasilla"),
                         "treat", full.names = TRUE)
@@ -596,33 +605,37 @@ DE$phenodata <- system.file("extdata/pasilla_sample_annotation.csv",
                             package = "pasilla")
 DE$factor <- "condition"
 DE$control <- "type"
-system(paste0("export R_LIBS_USER=", Sys.getenv("R_LIBS_USER")))
-DEres <- runCWL(DE, outdir = tempdir(), stderr="",
-                Args = "--preserve-entire-environment")
+DEres <- runCWL(DE, outdir = tempdir())
 ```
 
-## Build a simple DNASeq pipeline
-### RcwlPipelines
+Here are the command and results:
+```{r, eval=FALSE}
+head(DEres$command)
+head(DEres$output)
+```
+
+### Build a simple DNASeq pipeline
+#### RcwlPipelines package
 
 The R scripts to build the CWL tools and pipelines based on the `Rcwl`
-package are stored in the "tools" and "pipelines" folder respectively.
-The function `cwlTools` can be used to collect the available scripts.
-The `cachePath` can be your existing cache directory or a new folder.
-
+package are stored in the "tools" and "pipelines" folder respectively
+in the `RcwlPipelines` package. The function `cwlTools` can be used to 
+catalog the available scripts, where the `cachePath` can be your 
+existing cache directory or a new folder:
 ```{r}
 tools <- cwlTools(cachePath = tempdir())
 tools
 ```
 
 The full paths can be pulled from the "fpath" column.
-```{r}
-library(dplyr)
+```{r, messange=FALSE}
+suppressPackageStartupMessages(library(dplyr))
 bfcinfo(tools) %>% select(rname, fpath)
 ```
 
-### Build a pipeline
-We can develop a pipline by utilizing the available tools. For
-example, a simple alignment pipelines with mapping and marking
+#### Build a pipeline
+A pipline can be built by utilizing the tools cataloged by the `tools`. 
+For example, a simple alignment pipelines with mapping and marking
 duplicates can be built from the `tools`.
 
 First, we load the required tools, bwa, samtools and picard
@@ -700,12 +713,12 @@ The pipeline is ready for use. We can plot the pipeline with
 plotCWL(Align)
 ```
 
-Let's run the pipeline.
+Let's test the pipeline.
 ```{r, eval=FALSE}
 library(BiocParallel)
 ids <- c("normal", "tumor")
-fq1 <- list.files("testdata", "1.fq.gz", full.names = TRUE)
-fq2 <- list.files("testdata", "2.fq.gz", full.names = TRUE)
+fq1 <- list.files(file.path(sysdir, "vignettes", "extdata"), "1.fq.gz", full.names = TRUE)
+fq2 <- list.files(file.path(sysdir, "vignettes", "extdata"), "2.fq.gz", full.names = TRUE)
 fq1 <- as.list(fq1)
 fq2 <- as.list(fq2)
 rg <- as.list(paste("@RG",
@@ -717,7 +730,7 @@ inputList <- list(RG = rg,
                   FQ1 = fq1,
                   FQ2 = fq2)
 paramList <- list(threads = 2,
-                  Ref = "testdata/ref.fa")
+                  Ref = file.path(sysdir, "vignettes", "extdata", "ref.fa"))
 
 result <- runCWLBatch(cwl = Align, outdir = tempdir(), inputList,
                       paramList, BPPARAM = MulticoreParam(2),
@@ -729,4 +742,393 @@ Check the results:
 dir(file.path(tempdir(), "normal"))
 ```
 
-# systemPipeR
+### Rcwl tutorial
+<https://hubentu.github.io/others/Rcwl>
+
+## *systemPipeR*
+
+### Overview
+
+*systemPipeR* provides utilities for building and running automated end-to-end
+analysis workflows for a wide range of research applications, including next
+generation sequence (NGS) experiments [@H_Backman2016-bt]. Important features include
+a uniform workflow interface across different data analysis applications,
+automated report generation, and support for running both R and command-line
+software, such as NGS aligners or peak/variant callers, on local computers or
+compute clusters (Fig. 1). The latter supports interactive job submissions and batch
+submissions to queuing systems of clusters. The main motivation and advantages
+of using *sytemPipeR* for complex data analysis tasks are:
+
+1. Facilitates design of complex NGS workflows involving multiple R/Bioconductor packages
+2. Common workflow interface for different NGS applications
+3. Makes NGS analysis with Bioconductor utilities more accessible to new users
+4. Simplifies usage of command-line software from within R
+5. Reduces complexity of using compute clusters for R and command-line software
+6. Accelerates runtime of workflows via parallelzation 
+7. Improves reproducibility by automating analyses and generation of analysis reports 
+
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "utilities.png"))`
+
+<div align="center">**Figure 1:** Relevant features in *systemPipeR*.
+Workflow design concepts are illustrated under (A & B). Examples of
+*systemPipeR’s* functionalities are given under (C). </div></br>
+
+This tutorial introduces how to use *systemPipeR's* new CWL (Common Workflow
+Language) interface to run data analysis workflows composed of both R and
+command-line analysis routines. In previous versions, *systemPipeR* used a
+custom command-line interface for this purpose which will continue to be
+supported for some time. With the latest Bioconductor Release 3.9, we are
+adopting for this functionality the widely used community standard CWL for
+describing analysis workflows in a generic and reproducible manner. Using this
+community standard in *systemPipeR* has many advantages. For instance, the
+integration of CWL allows to run *systemPipeR* workflows from a single
+specification instance either entirely from within R, from various command-line
+wrappers (e.g.  *cwl-runner*) or from other languages (*e.g.* Bash or Python).
+This includes support for both command-line and R/Bioconductor software as well
+as resources for containerization, parallel evaluations on computer clusters
+along with automated generation of interactive analysis reports. 
+
+This overview also introduces the design of a new CWL S4 class in *systemPipeR*
+combined with examples of the basic usage of CWL from both within R and the
+command-line, as well as the construction of custom workflows. A short use-case
+demonstration will guide users through basic steps of an RNA-Seq profiling
+workflow that will include read mappings with variable parameter settings of
+popular short-read aligners (*e.g.* HISAT2 or STAR), read quantification and
+statistical analyses steps as well as automation routines for running NGS
+workflows from start to finish with a single command. The last part will
+demonstrate how to parallelize the analysis of a relatively large NGS data sets
+on multiple CPU cores of single machines as well as computer clusters with a
+scheduler (*e.g.* Slurm). 
+
+### Getting Started
+
+#### Installation
+
+The *`systemPipeR`* package can be installed from the R console using the
+[*`BiocManager::install`*](https://cran.r-project.org/web/packages/BiocManager/index.html)
+command. The associated data package
+[*`systemPipeRdata`*](https://github.com/tgirke/systemPipeRdata) can be
+installed the same way. The latter is a helper package for generating
+*`systemPipeR`* workflow environments with a single command containing all
+parameter files and sample data required to quickly test and run sample workflows. 
+
+```{r install2, eval=FALSE}
+if(!requireNamespace("BiocManager", quietly=TRUE)) 
+    install.packages("BiocManager")
+BiocManager::install("systemPipeR")
+BiocManager::install("systemPipeRdata")
+```
+
+#### Load package
+
+```{r documentation, messages=FALSE, warnings=FALSE}
+library("systemPipeR") # Loads the package
+library(help="systemPipeR") # Lists package info
+#vignette("systemPipeR") # Opens vignette
+```
+
+### Run environment
+
+#### Load sample workflow
+
+Sample workflows can be loaded with the `genWorkenvir` function from
+`systemPipeRdata`. The following commands load an RNA-Seq workflow that
+includes 36 FASTQ files from SRA entry
+[`SRP010938`](http://www.ncbi.nlm.nih.gov/sra/?term=SRP010938) corresponding to
+18 paired-end (PE) read sets from *Arabidposis thaliana* [@Howard2013-fq]. To
+minimize processing time during testing, each of the 36 FASTQ files has been
+subsetted to 90,000-100,000 randomly sampled PE reads that map to the first
+100,000 nucleotides of each chromosome in the *A. thalina* genome. The
+corresponding reference genome sequence (FASTA) and its GFF annotion file have
+been truncated accordingly, and are included in the workflow as well. After
+these truncations, the entire test data set requires less than 200MB disk
+space. A PE read set has been chosen here for flexibility, because it can be
+used for testing both types of analysis routines requiring either SE (single
+end) or PE reads. 
+
+```{r genRna_workflow, eval=FALSE}
+library(systemPipeRdata)
+genWorkenvir(workflow="rnaseq")
+setwd("rnaseq")
+```
+
+### Directory structure
+
+The working environment of the sample data loaded in the previous step contains
+the following preconfigured directory structure (Fig. 2). Directory names are indicated
+in  <span style="color:grey">***green***</span>. Users can change this
+structure as needed, but need to adjust the code in their workflows
+accordingly. 
+
+* <span style="color:green">_**workflow/**_</span> (*e.g.* *rnaseq/*) 
+    + This is the root directory of the R session running the workflow.
+    + Run script ( *\*.Rmd*) and sample annotation (*targets.txt*) files are located here.
+    + Note, this directory can have any name (*e.g.* <span style="color:green">_**rnaseq**_</span>, <span style="color:green">_**varseq**_</span>). Changing its name does not require any modifications in the run script(s).
+  + **Important subdirectories**: 
+    + <span style="color:green">_**param/**_</span> 
+        + Stores non-CWL parameter files such as: *\*.param*, *\*.tmpl* and *\*\*run.sh*. These files are only required for backwards compatibility to run old workflows using the previous custom command-line interface.
+        + <span style="color:green">_**param/cwl/**_</span>: This subdirectory stores all the CWL parameter files. To organize workflows, each can have its own subdirectory, where all `CWL param` and `input.yml` files need to be in the same subdirectory. 
+    + <span style="color:green">_**data/**_ </span>
+        + FASTQ files
+        + FASTA file of reference (*e.g.* reference genome)
+        + Annotation files
+        + etc.
+    + <span style="color:green">_**results/**_</span>
+        + Analysis results are usually written to this directory, including: alignment, variant and peak files (BAM, VCF, BED); tabular result files; and image/plot files
+        + Note, the user has the option to organize all the results files for a given sample and analysis step in a separate subdirectory.
+
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "directory.png"))`
+
+<div align="center">**Figure 2:** *systemPipeR's* preconfigured directory structure. </div></br>
+
+The following parameter files are included in each workflow template:
+
+1. *`targets.txt`*: initial one provided by user; downstream *`targets_*.txt`* files are generated automatically;
+2. *`*.param/cwl`*: defines parameter for input/output file operations, *e.g.*:
+    + *`hisat2-se/hisat2-mapping-se.cwl`* 
+    + *`hisat2-se/hisat2-mapping -se.yml`*
+3. *`*_run.sh`*: optional bash scripts 
+4. Configuration files for computer cluster environments (skip on single machines):
+    + *`.batchtools.conf.R`*: defines the type of scheduler for *`batchtools`* pointing to template file of cluster, and located in user's home directory
+    + *`*.tmpl`*: specifies parameters of scheduler used by a system, *e.g.* Torque, SGE, Slurm, etc.
+
+#### Workflow design
+
+The introduction of the new workflow control class, *`SYSargs2`* an R S4 class
+(see Fig. 3), improve *systemPipeR* user interface. The workflows can be
+designed by connecting *`SYSargs2`* workflow control modules. The *`SYSargs2`*
+new design interconnecting with CWL allows running many steps in only one
+instance. The central connectivity among all the steps in only one instance or
+between modules are the input/output information shared with directly connected
+workflow steps. Each of *`SYSargs2`* container can be independent or connected.
+*`SYSargs2`* objects stores all the information and instructions needed for
+processing a set of input files with a specific command-line or a series of
+command-line within a workflow. We also introduce a new class which is able to
+store and manage all the *`SYSargs2`* containers, *`SYSargs2Pipe`*, an R S4
+class. *`SYSargs2Pipe`* stores a list  *`SYSargs2`* objects.
+
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "SYSargs2.png"))`
+
+<div align="center">**Figure 3:** Workflow steps with input/output file operations are controlled
+by  *`SYSargs2`* objects. Each *`SYSargs2`* instance is constructed from one
+targets and two param files. The only input provided by the user is the initial
+targets file. Subsequent targets instances are created automatically. Any
+number of predefined or custom workflow steps are supported. They are
+are stored and connected in the *`SYSargs2Pipe`* container. </div></br>
+
+### Usage of *`SYSargs2`* 
+
+#### Sample inputs: *`targets`* file
+
+The *`targets`* file defines all input files (*e.g.* FASTQ, BAM, BCF) and if
+necessary sample comparisons of an analysis workflow. The following shows the
+format of a sample *`targets`* file included in the package. It also can be
+viewed and downloaded from *`systemPipeR`*'s GitHub repository
+[here](https://github.com/tgirke/systemPipeR/blob/master/inst/extdata/targets.txt).
+In a target file with a single type of input files, here FASTQ files of single
+end (SE) reads, the first three columns are mandatory including their column
+names, while it is four mandatory columns for FASTQ files of PE reads. All
+subsequent columns are optional and any number of additional columns can be
+added as needed. 
+
+Users should note here, the usage of targets files is optional when using
+*systemPipeR's* new CWL interface, since they can be replaced by a standard YAML
+input file used by CWL. Since for organizing experimental variables targets
+files are extremely useful and user-friendly, we encourage users to keep using 
+them. 
+
+```{r targetsSE, eval=TRUE}
+library(systemPipeR)
+targetspath <- system.file("extdata", "targets.txt", package="systemPipeR") 
+read.delim(targetspath, comment.char = "#")[1:4,1:4]
+```
+
+To work with custom data, users need to generate a *`targets`* file containing
+the paths to their own FASTQ files and then provide under *`targetspath`* the
+path to the corresponding *`targets`* file.  
+
+If needed sample comparisons can be defined in the header lines of the *`targets`* 
+file starting with '``# <CMP>``'. 
+
+```{r comment_lines, echo=TRUE}
+readLines(targetspath)[1:4]
+```
+
+The function *`readComp`* imports the comparison information and stores it in a
+*`list`*. Alternatively, *`readComp`* can obtain the comparison information
+from the corresponding *`SYSargs2`* object (see below).  Note, these header
+lines are optional. They are mainly useful for controlling comparative analyses
+according to certain biological expectations, such as identifying
+differentially expressed genes in RNA-Seq experiments based on simple pair-wise
+comparisons.
+ 
+```{r targetscomp, eval=TRUE}
+readComp(file=targetspath, format="vector", delim="-")
+```
+
+### Construct *`SYSargs2`*
+
+*`SYSargs2`* stores all the information and instructions needed for processing
+a set of input files with a single or many command-line steps within a workflow
+(*i.e.* several components of a software or several independent software tools).
+The *`SYSargs2`* object is created with the *loadWorkflow* and
+*renderWF* functions. They render the proper command-line strings for each
+sample and software tool of a workflow. The output components of *`SYSargs2`* define
+all the expected output files for each step in the workflow; some of which are
+the input for the next workflow step, here next *`SYSargs2`* instance (see Fig.
+3). In an 'R-centric' rather than a 'CWL-centric' workflow design the connectivity 
+among workflow steps is established by writing all relevant output with the *writeTargetsout* 
+function to a new targets file that serves as input to the next *loadWorkflow* and *renderWF* call. By
+chaining several *`SYSargs2`* steps together one can construct complex
+workflows involving many sample-level input/output file operations with any
+combination of command-line or R-based software. Alternatively, a CWL-centric
+workflow design can be used that defines all/most workflow steps with CWL workflow and
+parameter files. Due to time and space restrictions the CWL-centric approach is not covered 
+by this tutorial. 
+
+In CWL, files with the extension *`.cwl`* define the parameters of a chosen 
+command-line step or workflow. The following imports a *`.cwl`* file (here *`hisat2-mapping-se.cwl`*) 
+for running the short read aligner HISAT2 [@Kim2015-ve].
+
+```{r SYSargs2_structure, eval=TRUE}
+library(systemPipeR)
+targets <- system.file("extdata", "targets.txt", package="systemPipeR")
+dir_path <- system.file("extdata/cwl/hisat2-se", package="systemPipeR")
+WF <- loadWorkflow(targets=targets, wf_file="hisat2-mapping-se.cwl",
+                   input_file="hisat2-mapping-se.yml",
+                   dir_path=dir_path)
+
+WF <- renderWF(WF, inputvars=c(FileName="_FASTQ_PATH_", SampleName="_SampleName_"))
+```
+
+Several accessor methods are available that are named after the slot names of the *`SYSargs2`* object. 
+
+```{r names_WF, eval=TRUE}
+names(WF)
+```
+
+Of particular interest is the *`cmdlist()`* method. It constructs the system
+commands for running command-lined software as specified by a given *`.cwl`*
+file combined with the paths to the input samples (*e.g.* FASTQ files) provided
+by a *`targets`* file. The example below shows the *`cmdlist()`* output for
+running HISAT2 on the first SE read sample. Evaluating the output of
+*`cmdlist()`* can be very helpful for designing and debugging *`.cwl`* files
+of new command-line software or changing the parameter settings of existing
+ones.  
+
+```{r cmdlist, eval=TRUE}
+cmdlist(WF)[1]
+modules(WF)
+targets(WF)[1]
+targets.as.df(targets(WF))[1:4,1:4]
+output(WF)[1]
+cwlfiles(WF)
+inputvars(WF)
+infile1(WF)[1:4]
+```
+
+### Demo of workflow steps
+
+#### Alignment with `HISAT2`
+The NGS reads of this project will be aligned against the reference
+genome sequence using `Hisat2` [@Kim2015-ve]. The parameter settings of the aligner are defined in the `workflow_hisat2-se.cwl` and `workflow_hisat2-se.yml` files.
+
+```{r hisat_alignment2, eval=TRUE}
+## Paired-End data - HISAT2 only
+targetsPE <- system.file("extdata", "targetsPE.txt", package="systemPipeR")
+dir_path <- system.file("extdata/cwl/hisat2-pe", package="systemPipeR")
+align <- loadWorkflow(targets=targetsPE, wf_file="hisat2-mapping-pe.cwl",
+                   input_file="hisat2-mapping-pe.yml",
+                   dir_path=dir_path)
+align <- renderWF(align, inputvars=c(FileName1="_FASTQ_PATH1_", FileName2="_FASTQ_PATH2_", SampleName="_SampleName_"))
+align
+
+## Paired-End data - HISAT2 workflow (Hisat2 and Samtools)
+dir_path <- system.file("extdata/cwl/workflow-hisat2-pe", package="systemPipeR")
+WF <- loadWorkflow(targets=targetsPE, wf_file="workflow_hisat2-pe.cwl",
+                   input_file="workflow_hisat2-pe.yml",
+                   dir_path=dir_path)
+WF <- renderWF(WF, inputvars=c(FileName1="_FASTQ_PATH1_", FileName2="_FASTQ_PATH2_", SampleName="_SampleName_"))
+WF
+```
+
+Subsetting *`SYSargs2`* class slots for each workflow step.
+
+```{r subset, eval=TRUE}
+## Testing subset_wf function
+subsetWF(WF, slot="input", subset='FileName1')
+subsetWF(WF, slot="output", subset=2)[1:2]
+subsetWF(WF, slot="output", subset="samtools-index.cwl")[1:2]
+subsetWF(WF, slot="step", subset=1)[1] ## subset all the HISAT2 commandline 
+subsetWF(WF, slot="output", subset=1, delete=TRUE)[1] ##DELETE
+```
+
+Execute *`SYSargs2`* on a single machine without submitting to a queuing system of a compute cluster. This way the input FASTQ files will be processed sequentially.
+
+```{r runCommandline_WF, eval=FALSE}
+library(systemPipeR)
+runCommandline(WF) ## creates the files in the ./results folder
+runCommandline(WF, dir=TRUE) ## creates the files in the ./results/workflowName/Samplename folder
+runCommandline(WF, dir=TRUE, make_bam = TRUE) ##if it uses the workflow with samtools, should not uses make_bam=TRUE
+```
+
+Check and update the output location if necessary.
+
+```{r output, eval=FALSE}
+WF <- output_update(WF, dir=TRUE) ## Updates the output(WF) to the right location in the subfolders
+WF <- output_update(WF, dir=TRUE, replace = ".bam") ## Updates the output(WF) to the right location in the subfolders
+output(WF)
+```
+
+Check whether all BAM files have been created.
+
+```{r WF_track, eval=FALSE}
+WF_track <- run_track(WF_ls = c(WF))
+names(WF_track)
+WF_steps(WF_track)
+track(WF_track)
+summaryWF(WF_track)
+```
+
+Parallelization of read/alignment stats via scheduler (*e.g.* Slurm) across several compute nodes.
+
+```{r clusterRun, eval=FALSE}
+library(batchtools)
+resources <- list(walltime=120, ntasks=1, ncpus=4, memory=1024)
+reg <- clusterRun2(WF, FUN=runCommandline2, conffile = ".batchtools.conf.R", template = "batchtools.slurm.tmpl", Njobs=4, runid="01", resourceList=resources)
+getStatus(reg=reg)
+
+WF <- output_update(WF, dir=TRUE) ## Updates the output(WF) to the right location in the subfolders
+output(WF)
+```
+
+#### Alignment stats
+
+The following provides an overview of the number of reads in each sample
+and how many of them aligned to the reference.
+
+```{r align_stats, eval=FALSE}
+read_statsDF <- alignStats(args=WF) 
+write.table(read_statsDF, "results/alignStatsWF.xls", row.names=FALSE, quote=FALSE, sep="\t")
+read_statsDF
+```
+
+#### Create *`new targets files`*
+
+To establish the connectivity between different instances, it is possible by writing the subsetting output with the *`writeTargetsout`* function to a new targets file that serves as input to the next *`loadWorkflow`* and *`renderWF`* call.
+
+```{r writeTargetsout, eval=FALSE}
+names(WF$clt)
+writeTargetsout(x=WF, file="default", step=1)
+```
+### Funding
+
+This project is funded by NSF award [ABI-1661152](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661152). 
+
+## Version Information
+
+```{r sessionInfo}
+sessionInfo()
+```
+
+## References

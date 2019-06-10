@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{BioC19CWL}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding[utf8]{inputenc}
-bibliography: bibtex.bib
+bibliography: "`r system.file(package='BioC19CWL', 'vignettes', 'bibtex.bib')`"
 ---
 
 # Bridging Bioconductor to other bioinformatics tools using CWL
@@ -56,7 +56,7 @@ A python package `cwltool` is required to be installed. The cwltool is the refer
 
 * Docker
 
-The Docker engine requirement is optional, but it can simplify software installation and management.
+The Docker engine requirement is optional, but it can simplify software installation and management. <https://docs.docker.com/install/>
 
 #### R Packages
 The [Bioconductor](http://www.bioconductor.org/) R Packages can be installed from the R console using the [_`BiocManager::install`_](https://cran.r-project.org/web/packages/BiocManager/index.html) command. The associated package for this Workshop [_`BioC19CWL`_](https://github.com/hubentu/BioC19CWL) can be installed directly from GitHub, as demonstrated below. The latter provide the samples demo data and all the parameter files required to test and run these examples quickly.
@@ -95,14 +95,12 @@ library(RcwlPipelines)
 * Design of CWL workflows
 * Understand how to wrap tools with `Rcwl`
 * Practice building a pipeline
-* ...
 
 ### Learning objectives
 * How to make analysis workflows more robust, reproducible and portable across heterogeneous computing systems
 * Create a basic `echo` tool
 * Build a simple DNASeq alignment pipeline
 * Usage of new CWL S4 class in *systemPipeR*
-* ...
 
 ## Introduction to CWL
 

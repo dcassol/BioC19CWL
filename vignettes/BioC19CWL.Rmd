@@ -16,8 +16,9 @@ bibliography: "`r system.file(package='BioC19CWL', 'vignettes', 'bibtex.bib')`"
 
 ```{r, echo=FALSE, out.width="30%"}
 knitr::include_graphics(
-            c(file.path(system.file(package='BioC19CWL', 'inst', 'vignettes', "images"), "cwllogo.jpg"),
-              "https://github.com/Bioconductor/BiocStickers/raw/master/systemPipeR/systemPipeR.png"))
+            c("https://www.commonwl.org/CWL-Logo-Header.png",
+              "https://github.com/Bioconductor/BiocStickers/raw/master/systemPipeR/systemPipeR.png",
+              "https://raw.githubusercontent.com/hubentu/BiocStickers/master/Rcwl/Rcwl.png"))
 ```
 
 ## Instructors and contact information
@@ -657,6 +658,8 @@ runApp(app)
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "cwlShiny.png"))`
 
+<div align="center">**Figure 6:**  Shiny webApp for `mulEcho`. </div></br>
+
 ### Wrap R command-line tool
 
 Let's wrap the previous "exscrDoc.R" with `Rcwl`.
@@ -791,6 +794,7 @@ The pipeline is ready for use. We can plot the pipeline with
 ```{r}
 plotCWL(Align)
 ```
+<div align="center">**Figure 7:**  Visualization for the pipeline `Align`. </div></br>
 
 Let's test the pipeline.
 ```{r, eval=FALSE}
@@ -848,7 +852,7 @@ of using *sytemPipeR* for complex data analysis tasks are:
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "utilities.png"))`
 
-<div align="center">**Figure 6:** Relevant features in *systemPipeR*.
+<div align="center">**Figure 8:** Relevant features in *systemPipeR*.
 Workflow design concepts are illustrated under (A & B). Examples of
 *systemPipeR’s* functionalities are given under (C). </div></br>
 
@@ -958,7 +962,7 @@ accordingly.
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "directory.png"))`
 
-<div align="center">**Figure 7:** *systemPipeR's* preconfigured directory structure. </div></br>
+<div align="center">**Figure 9:** *systemPipeR's* preconfigured directory structure. </div></br>
 
 The following parameter files are included in each workflow template:
 
@@ -988,7 +992,7 @@ class. *`SYSargs2Pipe`* stores a list  *`SYSargs2`* objects.
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "SYSargs2.png"))`
 
-<div align="center">**Figure 8:** Workflow steps with input/output file operations are controlled
+<div align="center">**Figure 10:** Workflow steps with input/output file operations are controlled
 by  *`SYSargs2`* objects. Each *`SYSargs2`* instance is constructed from one
 targets and two param files. The only input provided by the user is the initial
 targets file. Subsequent targets instances are created automatically. Any
@@ -1210,10 +1214,6 @@ This project is funded by NSF award [ABI-1661152](https://www.nsf.gov/awardsearc
 sessionInfo()
 ```
 
-## References
-
-
-
 ## Sharing your tools
 
 CWL is modular in nature: a CWL workflow consists of multiple steps which are nothing other than individual CWL tool descriptions linked together. These CWL tools are reusable and can be simply added to a new workflow every time you need them in your analysis. Because of this, tool developers are encouraged to wrap their tools into CWL and share these wrappers publicly, thus enabling scientists (and enthusiasts alike) to include them in their data analysis pipelines as easy as a simple drag and drop in a convenient GUI CWL editor (such as [Rabix Composer](https://github.com/rabix/composer)).
@@ -1222,7 +1222,7 @@ CWL is modular in nature: a CWL workflow consists of multiple steps which are no
 `r knitr::include_graphics("https://github.com/rabix/composer/raw/master/doc/images/workflows.gif")`
 </center>
 
-<div align="center">**Figure 9:** Creating CWL workflow with Rabix Composer. </div></br>
+<div align="center">**Figure 11:** Creating CWL workflow with Rabix Composer. </div></br>
 
 Said scientists can then do the same and make their pipelines publicly available as supplementary material to their research papers. A bundle of input data, a Docker image and a CWL description of the workflow will enable anyone interested in reproducing your results do that in a matter of few clicks.
 
@@ -1232,5 +1232,4 @@ Publishing the tools and workflows you've developed to the Platform's Public App
 
 If you've been using Docker to encapsulate your tools (when describing in CWL using containers is actually not a hard requirement but a recommendation) - you should also consider registering your tools on the [Dockstore](https://dockstore.org/). It's an open platform for sharing Docker-based tools described in CWL or one of the two other description languages supported: WDL or Nextflow.
 
-
-
+## References

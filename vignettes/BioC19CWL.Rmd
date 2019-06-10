@@ -16,7 +16,7 @@ bibliography: "`r system.file(package='BioC19CWL', 'vignettes', 'bibtex.bib')`"
 
 ```{r, echo=FALSE, out.width="30%"}
 knitr::include_graphics(
-            c(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "cwllogo.jpg"),
+            c(file.path(system.file(package='BioC19CWL', 'inst', 'vignettes', "images"), "cwllogo.jpg"),
               "https://github.com/Bioconductor/BiocStickers/raw/master/systemPipeR/systemPipeR.png"))
 ```
 
@@ -29,7 +29,9 @@ knitr::include_graphics(
 <!--
 Put together some phrases. Need to describe better
 -->
-This workshop introduces how to use Common Workflow Language (CWL) in different perspectives. The *Rcwl* and *RcwlPipelines* packages which is built on top of the Common Workflow Language (CWL), it will provide a simple and easy way to wrap command line tools and build data analysis pipelines in R using CWL. Also, *systemPipeR* will demonstrate how workflows can be run from a single specification instance either entirely from within R, from various command-line wrappers (e.g., cwl-runner) or from other languages (e.g., Bash or Python). We will present a guide and best practices for creating container images (Docker) out of your R scripts, wrapping them in the *CWL* and then sharing them with the wider world.
+This workshop starts with teaching Common Workflow Language (*CWL*) basics before it shifts off to demonstrate exciting new CWL-related Bioconductor functionality to help R-savvy bioinformaticias see it from different perspectives. The *Rcwl* and *RcwlPipelines* packages provide a simple way to wrap command line tools and build CWL data analysis pipelines programmatically in R. Once the workflow is wrapped, with *systemPipeR* it's possible to run it from a single specification instance either entirely from within R, from various command-line wrappers (e.g., cwl-runner) or from other languages (e.g., Bash or Python). We will present a guide and best practices for creating container images (Docker) out of your R scripts, wrapping them in CWL and then sharing them with the wider world through the public apps gallery of the *Cancer Genomics Cloud*.
+
+Participants will be guided through a self-contained R Markdown document. Participants are encouraged to try and create a CWL wrapper for a script on their own.
 
 ## Pre-requisites
 - Basic knowledge of R and usage of Bioconductor packages for NGS analysis
@@ -41,7 +43,6 @@ Participants will be able to try out all of the functionality described. Active 
 
 ## _R_ / _Bioconductor_ packages used
 * [`docopt`](https://github.com/docopt/docopt.R)
-* [`sevenbridges`](https://bioconductor.org/packages/release/bioc/html/sevenbridges.html)
 * [`Rcwl`](https://bioconductor.org/packages/release/bioc/html/Rcwl.html)
 * [`RcwlPipelines`](https://bioconductor.org/packages/release/bioc/html/RcwlPipelines.html)
 * [`systemPipeR`](http://www.bioconductor.org/packages/release/bioc/html/systemPipeR.html)
@@ -82,7 +83,7 @@ library(RcwlPipelines)
 | Activity                                     | Instructor     | Time |
 |----------------------------------------------|----------------|------|
 | Introduction to CWL                          | Marko Zecevic  | 10m  |
-| Turning your script into a command line tool | Marko Zecevic  | 30m  |
+| Turning your script into a command line tool | Marko Zecevic  | 20m  |
 | Rcwl to wrap Bioinformatics tools            | Qiang Hu       | 10m  |
 | Write your pipeline with Rcwl                | Qiang Hu       | 20m  |
 | Case study                                   | Qiang Hu       | 10m  |
@@ -104,40 +105,52 @@ library(RcwlPipelines)
 
 ## Introduction to CWL
 
-Sharing a data analysis pipeline which you created using ad hoc methods is a challenging task. Failure to address any detail regarding commands, tools or the enviromenent in which the analysis is performed can hinder the reproducibility of your work.
+Sharing a data analysis pipeline which you created using ad hoc methods is a challenging task. Failure to address any detail regarding commands, tools or the environment in which the analysis is performed can hinder the reproducibility of your work.
 
 <center>
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "nocwl1.png"))`
 </center>
 
+<div align="center">**Figure 1:** Prior modes of development: no containers (dependencies need to be harmonized), no standard workflow descriptions, executes differently in each environment. </div></br>
+
 To overcome this challenge, the bioinformatics community is embracing the use of software container technologies (such as Docker) and workflow description languages for easier documentation and replication of analysis pipelines.
 
 Docker containers simplified how we share software, because they neatly package up code and all its dependencies, and run it in an isolated environment directly on top of the host OS. Multiple containers can run on the same machine and share the OS kernel among themselves. That makes them much smaller, more portable and less computationally intense than virtual machines. 
 
-However, containers do not come with instructions on how to execute these applications in a fashion that is human or machine-readable. This is where workflow description languages come into play. The Common Workflow Language (CWL), established in 2014, is a community-developed and widely adopted specification for describing containerized tools and workflows with plain text documents in a way that enables automation, scaling and reproducibility. Applications described with Docker images and CWL will run consistently, in the way you intend, on everything from your local computer, your HPC, to your cloud infrastructure and various cloud platforms.
+However, containers do not come with instructions on how to execute these applications in a fashion that is human or machine-readable. This is where workflow description languages come into play. The Common Workflow Language (CWL), established in 2014, is a community-developed and widely adopted specification for describing containerized tools and workflows with plain text documents in a way that enables automation, scaling and reproducibility. 
+
+Applications described with Docker images and CWL will run consistently, in the way you intend, on everything from your local computer, your HPC, to your cloud infrastructure and various cloud platforms.
 
 <center>
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "yescwl1.png"))`
 </center>
 
-CWL can be written in easily readable and parsable YAML, or a bit less readable, but just as parsable JSON - or a combination of both! It allows for extensions and tooling that facilitate code development, testing, and execution. One such set of tools is the [Rabix project](Rabix.io) from Seven Bridges - an open-source project that enables rapid composition and execution of CWL workflows in a manner that is scalable and reproducible.
+<div align="center">**Figure 2:** Development with standards: containers manage dependencies, standard workflow descriptions, executes the same in multiple environments. </div></br>
 
-Included in CWL tool or workflow description:
+CWL can be written in easily readable and parsable YAML, or a bit less readable, but just as parsable JSON - or a combination of both! There’s an increasing number of extensions and tooling that facilitate code development, testing, and execution. One such set of tools is the [Rabix project](Rabix.io) from Seven Bridges - an open-source project that enables rapid composition and execution of CWL workflows in a manner that is scalable and reproducible.
 
+CWL requires executors or workflow engines to interpret and execute. Later on you will learn how to run CWL tools using SystemPipeR R package.
+
+CWL as a standard consists of two separate specifications: CommandLineTool and Workflow. CommandLineTool describes how to execute a single command line (same as in the linux terminal), based on a set of input files and parameters. Workflow describes how multiple CommandLineTools and other Workflows are connected in an analysis.
+
+Included in CWL CommandLineTool description:
+
+* Class: `CommandLineTool`
 * CWL version
-* Class: `CommandLineTool` or `Workflow`
-* All commands necessary to run tool(s)
-* References to containers containing the tools with all dependencies
+* Tool label/id
+* A list of inputs, outputs and a complete "recipe" for building the command line
+* Reference to a container containing the tools with all dependencies
 
 ```
 class: CommandLineTool
 cwlVersion: v1.0
+label: SAMtools view
 id: samtools-1-6-view
 baseCommand:
 - /opt/samtools-1.6/samtools 
 - view
 inputs:
-- id: input_bam_file
+- id: input_sam_file
   type: File
   inputBinding:
     position: 2
@@ -148,22 +161,90 @@ inputs:
     prefix: -o
     valueFrom: |-
       ${
-          return inputs.output_filename + ".sam"
+          return inputs.output_filename + ".bam"
       }
 outputs:
-- id: sam_output
+- id: bam_output
   type: File?
   outputBinding:
-    glob: "*.sam"
+    glob: "*.bam"
+arguments:
+- position: 0
+  prefix: ''
+  valueFrom: "-S"
+- position: 0
+  prefix: ''
+  valueFrom: "-b"
 requirements:
 - class: DockerRequirement
   dockerPull: images.sbgenomics.com/milana_kaljevic/samtools:1.6
 - class: InlineJavascriptRequirement
 ```
 
-CWL requires executors or workflow engines to interpret and execute.
+<div align="center">**Figure 3:**  CommandLineTool example (Samtools view). </div></br>
 
-### Example usecase
+Included in CWL Workflow description:
+
+* Class: `Workflow`
+* CWL version
+* Workflow label/id
+* A list of inputs and outputs
+* A list of steps (individual tools) with connections
+
+```
+class: Workflow
+cwlVersion: v1.0
+label: SAMtools pipeline
+id: samtools-1-6-pipeline
+inputs:
+  - id: input_sam_file
+    type: File
+  - id: output_filename
+    type: string
+outputs:
+  - id: indexed_bam
+    outputSource:
+      - samtools_1_6_index/indexed_bam
+    type: File
+  - id: bam_index
+    outputSource:
+      - samtools_1_6_index/bam_index
+    type: File
+steps:
+  - id: samtools_1_6_view
+    in:
+      - id: input_sam_file
+        source: input_sam_file
+      - id: output_filename
+        source: output_filename
+    out:
+      - id: bam_output
+    run: samtools-view.cwl
+  - id: samtools_1_6_sort
+    in:
+      - id: input_bam
+        source: samtools_1_6_view/bam_output
+    out:
+      - id: sorted_bam
+    run: samtools-sort.cwl
+  - id: samtools_1_6_index
+    in:
+      - id: sorted_input
+        source: samtools_1_6_sort/sorted_bam
+    out:
+      - id: indexed_bam
+      - id: bam_index
+    run: samtools-index.cwl
+```
+<div align="center">**Figure 4:**  Workflow example (Samtools view -> sort -> index). </div></br>
+
+<center>
+`r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "pipeline.png"))`
+</center>
+
+<div align="center">**Figure 5:**  Graphical representation of a CWL workflow. </div></br>
+
+### Example use case
 
 Perhaps you are a researcher analyzing a dataset using Bioconductor tools and are planning to share your methods and findings with the world. You want your analysis to be reproducible so that once it's published, anyone with the access to the input data can repeat everything you've done and produce exactly the same outputs.
 
@@ -210,7 +291,7 @@ In the example above, the input files used come from the [pasilla package](http:
 
 ### The command-line interface
 
-The first thing one needs to do in order to wrap his R/Bioconductor script into a neat portable CWL package is define the command-line interface. This can be done easily by using the R implementation of [docopt](http://docopt.org/). With docopt, by providing your script with a help message, you are at the same time defining its command line interface.
+The first thing one needs to do in order to wrap their R/Bioconductor script into a neat portable CWL package is define the command-line interface. This can be done easily by using the R implementation of [docopt](http://docopt.org/). With docopt, by providing your script with a help message, you are at the same time defining its command line interface.
 
 See the re-worked script below:
 
@@ -295,7 +376,7 @@ RUN apt-get update && apt-get install -y -q python-pip && \
     rm -rf /var/lib/apt/lists/*
 ```
 
-A Dockerfile consists of two kind of items: instructions followed by arguments and comments. The first instruction and argument in our example Dockerfile assign a specific ubuntu 18.04 (revision identified by the `bionic-20190515` tag) image as the base image that we build upon. After that, each command adds another layer on top. And the base image we started from is probably also made of multiple layers. Think of layers as analogous to git commits - each layer is a set of filesystem changes. When you launch a container from an image, Docker adds a read-write layer to the top of that stack of read-only layers.
+A Dockerfile consists of two kinds of items: instructions followed by arguments and comments. The first instruction and argument in our example Dockerfile assign a specific ubuntu 18.04 (revision identified by the `bionic-20190515` tag) image as the base image that we build upon. After that, each command adds another layer on top. And the base image we started from is probably also made of multiple layers. Think of layers as analogous to git commits - each layer is a set of filesystem changes. When you launch a container from an image, Docker adds a read-write layer to the top of that stack of read-only layers.
 
 The Bioconductor team maintains a [set of Docker images](https://www.bioconductor.org/help/docker/) which you can build upon. To be able to run our DESeq2 script in a container, we need to install ```DESeq2``` and ```ReportingTools``` libraries.
 
@@ -767,7 +848,7 @@ of using *sytemPipeR* for complex data analysis tasks are:
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "utilities.png"))`
 
-<div align="center">**Figure 1:** Relevant features in *systemPipeR*.
+<div align="center">**Figure 6:** Relevant features in *systemPipeR*.
 Workflow design concepts are illustrated under (A & B). Examples of
 *systemPipeR’s* functionalities are given under (C). </div></br>
 
@@ -877,7 +958,7 @@ accordingly.
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "directory.png"))`
 
-<div align="center">**Figure 2:** *systemPipeR's* preconfigured directory structure. </div></br>
+<div align="center">**Figure 7:** *systemPipeR's* preconfigured directory structure. </div></br>
 
 The following parameter files are included in each workflow template:
 
@@ -907,7 +988,7 @@ class. *`SYSargs2Pipe`* stores a list  *`SYSargs2`* objects.
 
 `r knitr::include_graphics(file.path(system.file(package='BioC19CWL', 'vignettes', "images"), "SYSargs2.png"))`
 
-<div align="center">**Figure 3:** Workflow steps with input/output file operations are controlled
+<div align="center">**Figure 8:** Workflow steps with input/output file operations are controlled
 by  *`SYSargs2`* objects. Each *`SYSargs2`* instance is constructed from one
 targets and two param files. The only input provided by the user is the initial
 targets file. Subsequent targets instances are created automatically. Any
@@ -1130,3 +1211,26 @@ sessionInfo()
 ```
 
 ## References
+
+
+
+## Sharing your tools
+
+CWL is modular in nature: a CWL workflow consists of multiple steps which are nothing other than individual CWL tool descriptions linked together. These CWL tools are reusable and can be simply added to a new workflow every time you need them in your analysis. Because of this, tool developers are encouraged to wrap their tools into CWL and share these wrappers publicly, thus enabling scientists (and enthusiasts alike) to include them in their data analysis pipelines as easy as a simple drag and drop in a convenient GUI CWL editor (such as [Rabix Composer](https://github.com/rabix/composer)).
+
+<center>
+`r knitr::include_graphics("https://github.com/rabix/composer/raw/master/doc/images/workflows.gif")`
+</center>
+
+<div align="center">**Figure 9:** Creating CWL workflow with Rabix Composer. </div></br>
+
+Said scientists can then do the same and make their pipelines publicly available as supplementary material to their research papers. A bundle of input data, a Docker image and a CWL description of the workflow will enable anyone interested in reproducing your results do that in a matter of few clicks.
+
+One such place, where you can store your tools and data alongside secure and scalable computational resources is the Cancer Genomics Cloud (CGC), a cloud-based genomics analysis platform funded by the NCI and powered by Seven Bridges. This platform already hosts several massive public datasets together with [a vast gallery of optimized, portable bioinformatics tools](https://cgc.sbgenomics.com/public/apps) which you can now add to! All of those tools, written in a variety of programming languages, are wrapped in CWL.
+
+Publishing the tools and workflows you've developed to the Platform's Public Apps gallery is done by publishing the project which contains them. To do that, follow [these simple instructions](https://docs.cancergenomicscloud.org/docs/publish-your-app).
+
+If you've been using Docker to encapsulate your tools (when describing in CWL using containers is actually not a hard requirement but a recommendation) - you should also consider registering your tools on the [Dockstore](https://dockstore.org/). It's an open platform for sharing Docker-based tools described in CWL or one of the two other description languages supported: WDL or Nextflow.
+
+
+

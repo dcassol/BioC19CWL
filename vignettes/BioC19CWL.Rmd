@@ -9,7 +9,7 @@ vignette: >
   %\VignetteIndexEntry{BioC19CWL}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding[utf8]{inputenc}
-bibliography: bibtex.bib
+bibliography: "`r system.file(package='BioC19CWL', 'vignettes', 'bibtex.bib')`"
 ---
 
 # Bridging Bioconductor to other bioinformatics tools using CWL
@@ -96,14 +96,12 @@ library(RcwlPipelines)
 * Design of CWL workflows
 * Understand how to wrap tools with `Rcwl`
 * Practice building a pipeline
-* ...
 
 ### Learning objectives
 * How to make analysis workflows more robust, reproducible and portable across heterogeneous computing systems
 * Create a basic `echo` tool
 * Build a simple DNASeq alignment pipeline
 * Usage of new CWL S4 class in *systemPipeR*
-* ...
 
 ## Introduction to CWL
 
@@ -1215,6 +1213,7 @@ sessionInfo()
 ## References
 
 
+
 ## Sharing your tools
 
 CWL is modular in nature: a CWL workflow consists of multiple steps which are nothing other than individual CWL tool descriptions linked together. These CWL tools are reusable and can be simply added to a new workflow every time you need them in your analysis. Because of this, tool developers are encouraged to wrap their tools into CWL and share these wrappers publicly, thus enabling scientists (and enthusiasts alike) to include them in their data analysis pipelines as easy as a simple drag and drop in a convenient GUI CWL editor (such as [Rabix Composer](https://github.com/rabix/composer)).
@@ -1232,7 +1231,6 @@ One such place, where you can store your tools and data alongside secure and sca
 Publishing the tools and workflows you've developed to the Platform's Public Apps gallery is done by publishing the project which contains them. To do that, follow [these simple instructions](https://docs.cancergenomicscloud.org/docs/publish-your-app).
 
 If you've been using Docker to encapsulate your tools (when describing in CWL using containers is actually not a hard requirement but a recommendation) - you should also consider registering your tools on the [Dockstore](https://dockstore.org/). It's an open platform for sharing Docker-based tools described in CWL or one of the two other description languages supported: WDL or Nextflow.
-
 
 
 

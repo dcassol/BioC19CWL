@@ -442,7 +442,7 @@ echo
 #### Test run
 The function `runCWL` is used to run the CWL object by invoking the python tool `cwltool`. The return will be a list including the command executed, temporary output and logs. The output directory is the current folder by default, but it can be changed by setting `outdir` option. All standard out and standard error stream can also be printed by setting `stderr = ""`.
 ```{r}
-r1 <- runCWL(echo, outdir = tempdir(), stderr="")
+r1 <- runCWL(echo, outdir = tempdir())
 r1
 ```
 

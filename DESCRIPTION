@@ -17,4 +17,4 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
-Imports: Rcwl, RcwlPipelines, systemPipeR, DESeq2, pasilla, ReportingTools, docopt
+Imports: Rcwl, RcwlPipelines, systemPipeR, systemPipeRdata, DESeq2, pasilla, ReportingTools, docopt, dplyr, BiocManager

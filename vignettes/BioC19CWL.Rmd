@@ -828,7 +828,7 @@ dir(file.path(tempdir(), "normal"))
 ### Rcwl tutorial
 <https://hubentu.github.io/others/Rcwl>
 
-## *systemPipeR*
+## *systemPipeR*'s New CWL Command-line Interface
 
 ### Overview
 
@@ -929,10 +929,14 @@ space. A PE read set has been chosen here for flexibility, because it can be
 used for testing both types of analysis routines requiring either SE (single
 end) or PE reads. 
 
-```{r genRna_workflow, eval=FALSE}
+```{r genRna_workflow, eval=TRUE, results='hide'}
 library(systemPipeRdata)
 genWorkenvir(workflow="rnaseq")
-setwd("rnaseq")
+```
+
+```{r setup, include=FALSE, echo=FALSE}
+library(knitr)
+opts_knit$set(root.dir = "./rnaseq/")
 ```
 
 ### Directory structure
@@ -1207,12 +1211,6 @@ writeTargetsout(x=WF, file="default", step=1)
 ### Funding
 
 This project is funded by NSF award [ABI-1661152](https://www.nsf.gov/awardsearch/showAward?AWD_ID=1661152). 
-
-## Version Information
-
-```{r sessionInfo}
-sessionInfo()
-```
 
 ## Sharing your tools
 

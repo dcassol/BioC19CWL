@@ -362,7 +362,7 @@ Now the script can be executed from the command line like this:
 Rscript exscrDoc.R --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated1fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated2fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/treated3fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated1fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated2fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated3fb.txt --counts /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/untreated4fb.txt --phenodata /Library/Frameworks/R.framework/Versions/3.5/Resources/library/pasilla/extdata/pasilla_sample_annotation.csv --factor condition --control type
 ```
 
-It's arguable if writing a help message is an overkill if the tool is only going to be executed inside a CWL wrapper. An alternative would be to use `commandArgs()` and parse the arguments yourself. One way to do it is described [here](https://www.r-bloggers.com/parse-arguments-of-an-r-script/).
+Writing a help message could be considered an overkill if the tool is only going to be executed inside a CWL wrapper. An alternative would be to use `commandArgs()` and parse the arguments yourself. One way to do it is described [here](https://www.r-bloggers.com/parse-arguments-of-an-r-script/).
 
 ### Dockerizing
 

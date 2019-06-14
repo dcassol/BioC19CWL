@@ -11,3 +11,7 @@ A python package `cwltool` is required to be installed. The cwltool is the refer
 * Docker
 
 The Docker engine requirement is optional, but it can simplify software installation and management.
+
+* [Hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml)
+
+`Hisat2` is required to be installed.

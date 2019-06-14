@@ -932,6 +932,7 @@ end) or PE reads.
 ```{r genRna_workflow, eval=TRUE, results='hide'}
 library(systemPipeRdata)
 genWorkenvir(workflow="rnaseq")
+setwd("rnaseq")
 ```
 
 ```{r setup, include=FALSE, echo=FALSE}

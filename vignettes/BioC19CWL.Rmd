@@ -27,7 +27,7 @@ knitr::include_graphics(
 * [Qiang Hu](https://github.com/hubentu) (Qiang.Hu@roswellpark.org)
 
 ## Workshop Description
-This workshop starts with teaching Common Workflow Language (**CWL**) basics before it shifts off to demonstrate exciting new CWL-related Bioconductor functionality to help R-savvy bioinformaticias see it from different perspectives. The `Rcwl` and `RcwlPipelines` packages provide a simple way to wrap command line tools and build CWL data analysis pipelines programmatically in R. Once the workflow is wrapped, with `systemPipeR` it's possible to run it from a single specification instance either entirely from within R, from various command-line wrappers (e.g., cwl-runner) or from other languages (e.g., Bash or Python). 
+This workshop starts with teaching Common Workflow Language (**CWL**) basics before it shifts off to demonstrate exciting new CWL-related Bioconductor functionality to help R-savvy bioinformaticias see it from different perspectives. The `Rcwl` and `RcwlPipelines` packages provide a simple way to wrap command line tools and build CWL data analysis pipelines programmatically in R. Also, this workshop introduces how to use `systemPipeR's` new `CWL` interface to run data analysis workflows composed of both R and command-line analysis routines. We will provide an overview of the design of the `systemPipeR's` new CWL S4 class, while the hand-on components will cover the basic usage of CWL from both within R and the command-line, as well as the construction of custom workflows.
 
 We will present a guide and best practices for creating container images (Docker) out of your R scripts, wrapping them in CWL and then sharing them with the wider world through the public apps gallery of the Cancer Genomics Cloud (**CGC**).
 
@@ -59,6 +59,10 @@ A python package `cwltool` is required to be installed. The cwltool is the refer
 
 The Docker engine requirement is optional, but it can simplify software installation and management. <https://docs.docker.com/install/>
 
+* [Hisat2](https://ccb.jhu.edu/software/hisat2/manual.shtml)
+
+`Hisat2` is required to be installed.
+
 #### R Packages
 The [Bioconductor](http://www.bioconductor.org/) R Packages can be installed from the R console using the [_`BiocManager::install`_](https://cran.r-project.org/web/packages/BiocManager/index.html) command. The associated package for this Workshop [_`BioC19CWL`_](https://github.com/hubentu/BioC19CWL) can be installed directly from GitHub, as demonstrated below. The latter provide the samples demo data and all the parameter files required to test and run these examples quickly.
 
@@ -82,12 +86,14 @@ library(RcwlPipelines)
 ## Time outline
 | Activity                                     | Instructor     | Time |
 |----------------------------------------------|----------------|------|
-| Introduction to CWL                          | Marko Zecevic  | 15m  |
+| Introduction to `CWL`                        | Marko Zecevic  | 15m  |
 | Turning your script into a command line tool | Marko Zecevic  | 15m  |
-| Rcwl to wrap Bioinformatics tools            | Qiang Hu       | 10m  |
-| Write your pipeline with Rcwl                | Qiang Hu       | 20m  |
+| `Rcwl` to wrap Bioinformatics tools          | Qiang Hu       | 10m  |
+| Write your pipeline with `Rcwl`              | Qiang Hu       | 20m  |
 | Case study                                   | Qiang Hu       | 10m  |
-| systemPipeR                                  | Daniela Cassol | 40m  |
+| Overview of `systemPipeR` package            | Daniela Cassol | 10m  |
+| Workflow Control Class                       | Daniela Cassol | 05m  |
+| Workflow Demonstration                       | Daniela Cassol | 25m  |
 | Sharing your tools                           | Marko Zecevic  | 5m   |
 
 ## Workshop goals and objectives
@@ -97,6 +103,7 @@ library(RcwlPipelines)
 * Design of CWL workflows
 * Understand how to wrap tools with `Rcwl`
 * Practice building a pipeline
+* Usage of a generic R-based workflow construction environment that is both scalable and reproducible
 
 ### Learning objectives
 * How to make analysis workflows more robust, reproducible and portable across heterogeneous computing systems

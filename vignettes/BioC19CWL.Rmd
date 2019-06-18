@@ -397,6 +397,12 @@ RUN R -e 'BiocManager::install("ReportingTools")'
 COPY Dockerfile /opt/
 ```
 
+Building an image using the Dockerfile is really simple - just run the following command in the same directory you have placed your Dockerfile:
+
+```{r, engine='bash', eval=FALSE}
+docker build -t bioc2019cwl:0.1.0 .
+```
+
 ## Rcwl
 ### Introduction to Rcwl
 #### Rcwl setup
